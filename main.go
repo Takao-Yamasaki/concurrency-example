@@ -3,16 +3,27 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
 func main() {
 	fmt.Println("what is today's lucky number?")
-	// 新ゴールーチン
-	go getLuckyNum()
 
-	// 5秒停止
-	time.Sleep(time.Second * 5)
+	// sync.WaitGroup構造体のwgを用意
+	var wg sync.WaitGroup
+
+	// wgの内部カウンタの値を+1
+	wg.Add(1)
+
+	go func() {
+		// ゴルーチンが終了したときにwgの内部カウンタの値を-1するよう設定
+		defer wg.Done()
+		getLuckyNum()
+	}()
+
+	// 内部カウンタが0になるまでメインゴルーチンをブロックして待つ
+	wg.Wait()
 }
 
 func getLuckyNum() {
