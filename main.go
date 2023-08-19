@@ -2,41 +2,28 @@ package main
 
 import (
 	"fmt"
-	"sync"
+	"math/rand"
+	"time"
 )
 
-func printSomething(s string, wg *sync.WaitGroup) {
-	defer wg.Done()
+func main() {
+	fmt.Println("what is today's lucky number?")
+	// 新ゴールーチン
+	go getLuckyNum()
 
-	fmt.Println(s)
+	// 5秒停止
+	time.Sleep(time.Second * 5)
 }
 
-func main() {
-	var wg sync.WaitGroup
+func getLuckyNum() {
+	fmt.Println("...")
 
-	// 処理は順不同となる
-	words := []string{
-		"alpha",
-		"beta",
-		"delta",
-		"gamma",
-		"pi",
-		"zeta",
-		"eta",
-		"theta",
-		"epsilon",
-	}
+	// 占いにかかる時間はランダム
+	// 乱数ジェネレータの初期化（毎回異なる乱数を生成したいため）
+	rand.Seed(time.Now().Unix())
+	// 0から2999マイクロ秒までの間、ランダムにプログラムの停止
+	time.Sleep(time.Duration(rand.Intn(3000)) * time.Microsecond)
 
-	// 処理が終わったら、減算される。ゼロにならないようにする。
-	wg.Add(len(words))
-
-	for i, x := range words {
-		go printSomething(fmt.Sprintf("%d: %s", i, x), &wg)
-	}
-
-	wg.Wait()
-
-	// ゼロにならないようにする
-	wg.Add(1)
-	printSomething("This is the second thing to be printed!!", &wg)
+	num := rand.Intn(10)
+	fmt.Printf("Today's your luchey number is %d\n", num)
 }
