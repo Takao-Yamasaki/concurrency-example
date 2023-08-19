@@ -3,30 +3,10 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
 
-func main() {
-	fmt.Println("what is today's lucky number?")
-
-	// sync.WaitGroup構造体のwgを用意
-	var wg sync.WaitGroup
-
-	// wgの内部カウンタの値を+1
-	wg.Add(1)
-
-	go func() {
-		// ゴルーチンが終了したときにwgの内部カウンタの値を-1するよう設定
-		defer wg.Done()
-		getLuckyNum()
-	}()
-
-	// 内部カウンタが0になるまでメインゴルーチンをブロックして待つ
-	wg.Wait()
-}
-
-func getLuckyNum() {
+func getLuckyNum(c chan<- int) {
 	fmt.Println("...")
 
 	// 占いにかかる時間はランダム
@@ -36,5 +16,24 @@ func getLuckyNum() {
 	time.Sleep(time.Duration(rand.Intn(3000)) * time.Microsecond)
 
 	num := rand.Intn(10)
+
+	// ラッキーナンバーをチャネルに送信
+	c <- num
+}
+
+func main() {
+	fmt.Println("what is today's lucky number?")
+
+	// チャネルを作成
+	c := make(chan int)
+	// チャネルを引数に渡す
+	go getLuckyNum(c)
+
+	// チャネルからラッキーナンバーを受信
+	num := <-c
+
 	fmt.Printf("Today's your luchey number is %d\n", num)
+
+	// 使い終わったチャネルはcloseする
+	close(c)
 }
